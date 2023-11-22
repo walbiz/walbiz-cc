@@ -1,0 +1,23 @@
+{
+  "name": "walbiz-api",
+  "version": "1.0.0",
+  "description": "Bangkit 2023 Batch 2 Capstone Project of CH2-PS0006",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=production node .",
+    "start-dev": "nodemon ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Walbiz/Walbiz-CC.git"
+  },
+  "author": "CH2-PS0006",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Walbiz/Walbiz-CC/issues"
+  },
+  "homepage": "https://github.com/Walbiz/Walbiz-CC#readme",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
