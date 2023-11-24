@@ -1,12 +1,33 @@
 const Sequelize = require('sequelize');
+const sequelize = require('../utils/database');
 const db = require('../utils/database');
+
+const createExtensionQuery = 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";';
+
+sequelize
+  .query(createExtensionQuery)
+  .then(() => {
+    console.log('uuid-ossp extension created (if not exists)');
+  })
+  .catch((error) => {
+    console.error('Error creating uuid-ossp extension:', error);
+  });
+
+sequelize
+  .sync()
+  .then(() => {
+    console.log('Database synced');
+  })
+  .catch((err) => {
+    console.error('Error syncing database:', err);
+  });
 
 const Article = db.define(
   'Article',
   {
     id: {
       type: Sequelize.DataTypes.UUID,
-      defaultValue: Sequelize.UUIDV4,
+      defaultValue: Sequelize.literal('uuid_generate_v4()'),
       allowNull: false,
       primaryKey: true,
     },

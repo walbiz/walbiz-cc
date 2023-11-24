@@ -32,27 +32,28 @@ exports.getArticle = (req, res, next) => {
 
 //POST Article
 exports.createArticle = (req, res, next) => {
-  const title = req.body.title;
-  const author = req.body.author;
-  const source = req.body.source;
-  const image_url = req.body.imageUrl;
-  const content = req.body.content;
+  const { title, author, source, image_url, content } = req.body;
 
-  if (!title) {
-    res.status(400).json({ message: 'Title is required!' });
-  } else if (!author) {
-    res.status(400).json({ message: 'Author is required!' });
-  } else if (!source) {
-    res.status(400).json({ message: 'Source is required' });
-  } else if (!content) {
-    res.status(400).json({ message: 'Content is required!' });
+  const data = {
+    title,
+    author,
+    source,
+    content,
+  };
+
+  let err = null;
+  Object.keys(data).forEach((key) => {
+    if (!data[key]) {
+      err = `${key} is required!`;
+    }
+  });
+
+  if (err != null) {
+    res.status(400).json({ message: err });
   } else {
     Article.create({
-      title: title,
-      author: author,
-      source: source,
+      ...data,
       image_url: image_url,
-      content: content,
     })
       .then((result) => {
         console.log('Article created!');
