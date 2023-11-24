@@ -50,10 +50,20 @@ const Article = db.define(
       type: Sequelize.TEXT,
       allowNull: false,
     },
+    created_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('now()'),
+      allowNull: false,
+    },
+    updated_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      allowNull: false,
+    },
   },
   {
     tableName: 'articles',
-    createdAt: 'created_at',
+    createdAt: false,
     updatedAt: 'updated_at',
   }
 );
