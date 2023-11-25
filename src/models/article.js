@@ -43,12 +43,15 @@ const Article = db.define(
       type: Sequelize.STRING,
       allowNull: false,
     },
-    image_url: {
-      type: Sequelize.STRING,
-    },
     content: {
       type: Sequelize.TEXT,
       allowNull: false,
+    },
+    description: {
+      type: Sequelize.TEXT,
+    },
+    image_url: {
+      type: Sequelize.STRING,
     },
     created_at: {
       type: Sequelize.DATE,
