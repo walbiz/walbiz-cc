@@ -32,7 +32,7 @@ exports.getArticle = (req, res, next) => {
 
 //POST Article
 exports.createArticle = (req, res, next) => {
-  const { title, author, source, image_url, content } = req.body;
+  const { title, author, source, content, description, image_url } = req.body;
 
   const data = {
     title,
@@ -53,6 +53,7 @@ exports.createArticle = (req, res, next) => {
   } else {
     Article.create({
       ...data,
+      description: description,
       image_url: image_url,
     })
       .then((result) => {
@@ -72,8 +73,9 @@ exports.updateArticle = (req, res, next) => {
   const updatedTitle = req.body.title;
   const updatedAuthor = req.body.author;
   const updatedSource = req.body.source;
-  const updatedImageUrl = req.body.imageUrl;
   const updatedContent = req.body.content;
+  const updatedDescription = req.body.description;
+  const updatedImageUrl = req.body.imageUrl;
 
   Article.findByPk(articleId)
     .then((article) => {
@@ -84,8 +86,9 @@ exports.updateArticle = (req, res, next) => {
       article.title = updatedTitle;
       article.author = updatedAuthor;
       article.source = updatedSource;
-      article.image_url = updatedImageUrl;
       article.content = updatedContent;
+      article.description = updatedDescription;
+      article.image_url = updatedImageUrl;
 
       return article.save();
     })
