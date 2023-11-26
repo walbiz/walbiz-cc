@@ -1,7 +1,6 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const sequelize = require('./utils/database');
-const Article = require('./models/article');
+import express from 'express';
+import dotenv from 'dotenv';
+import articleRoutes from './routes/articles.js';
 
 dotenv.config();
 
@@ -22,7 +21,7 @@ app.get('/', (req, res, next) => {
 });
 
 // CRUD routes
-app.use('/articles', require('./routes/articles'));
+app.use('/articles', articleRoutes);
 
 // Error handling
 app.use((error, req, res, next) => {
@@ -36,11 +35,3 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`API is listening on port ${PORT} 🔥`);
 });
-
-// Sync database
-sequelize
-  .sync()
-  .then((result) => {
-    console.log('Database connected');
-  })
-  .catch((err) => console.log(err));
