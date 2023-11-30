@@ -2,64 +2,68 @@ import { query } from '../db/index.js';
 
 // CRUD Controllers
 
-//GET All Articles
-// export const getArticles = async (req, res, next) => {
-//   try {
-//     const articlesQuery = 'SELECT * FROM articles';
-//     const result = await query(articlesQuery);
-//     return res.status(200).json({ articles: result.rows });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
 export const getArticles = async (req, res, next) => {
   try {
     // Extract query parameters
     const { limit, offset, search } = req.query;
 
-    // Check if all parameters are empty
-    if (!limit && !offset && !search) {
-      const articlesQuery = 'SELECT * FROM articles';
-      const result = await query(articlesQuery);
-      return res.status(200).json({ articles: result.rows });
+    const countParams = [];
+
+    // Get total count of all items
+    let searchQuery = '';
+    if (`%${search}%`) {
+      searchQuery = `
+        WHERE
+        title ILIKE $1
+        OR description ILIKE $1`;
+      countParams.push(`%${search}%`);
     }
 
-    // Build the base SQL query
-    let articlesQuery = 'SELECT *, COUNT(*) OVER() AS total_count FROM articles';
+    const totalCountQuery = `
+            SELECT
+              COUNT(a.id) AS total_count
+            FROM
+              articles a ${searchQuery}`;
+    const countRes = await query(totalCountQuery, countParams);
+    const totalCount = countRes.rows[0]['total_count'];
+
+    // Initialize article query
+    const params = [];
+    let paramIndex = 1;
+
+    let baseQuery = `
+      SELECT
+        a.id,
+        a.title,
+        a.description,
+        a.image_url,
+        a.updated_at
+      FROM articles a
+    `;
 
     // Add search condition if provided
     if (search) {
-      articlesQuery += ` WHERE title ILIKE $1 OR description ILIKE $1`;
-    }
-
-    // Add limit and offset conditions if provided
-    let params = [];
-    let paramIndex = 1; // Start index for parameters
-
-    if (search) {
+      baseQuery += ` WHERE title ILIKE $${paramIndex} OR description ILIKE $${paramIndex}`;
       params.push(`%${search}%`);
-      paramIndex++; // Move to the next index for parameters
+      paramIndex++;
     }
 
     if (limit) {
-      articlesQuery += ` LIMIT $${paramIndex}`;
+      baseQuery += ` LIMIT $${paramIndex}`;
       params.push(parseInt(limit));
       paramIndex++; // Move to the next index for parameters
     }
 
     if (offset) {
-      articlesQuery += ` OFFSET $${paramIndex}`;
+      baseQuery += ` OFFSET $${paramIndex}`;
       params.push(parseInt(offset));
     }
 
     // Execute the query
-    const result = await query(articlesQuery, params);
+    const result = await query(baseQuery, params);
 
     // Extract relevant data from the result
     const articles = result.rows;
-    const totalCount = articles.length > 0 ? parseInt(articles[0].total_count) : 0;
 
     // Format the response
     const response = {
@@ -67,16 +71,17 @@ export const getArticles = async (req, res, next) => {
         id: article.id,
         title: article.title,
         description: article.description,
-        image_url: article.image_url,
-        updated_at: article.updated_at,
+        imageUrl: article.image_url,
+        updatedAt: article.updated_at,
       })),
-      total_count: totalCount,
+      totalCount: totalCount,
+      error: null,
     };
 
     return res.status(200).json(response);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ nodes: null, totalCount: 0, error: 'INTERNAL_SERVER_ERROR' });
   }
 };
 
@@ -89,19 +94,19 @@ export const getArticle = async (req, res, next) => {
     const result = await query(articleQuery, [articleId]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Article not found!' });
+      return res.status(200).json({ article: null, error: 'ARTICLE_NOT_FOUND' });
     }
 
-    return res.status(200).json({ article: result.rows[0] });
+    return res.status(200).json({ article: result.rows[0], error: null });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Internal Server Error!' });
+    return res.status(500).json({ article: null, error: 'INTERNAL_SERVER_ERROR' });
   }
 };
 
 // POST Article
 export const createArticle = async (req, res, next) => {
-  const { title, author, source, description, content, image_url } = req.body;
+  const { title, author, source, description, content, imageUrl } = req.body;
 
   const data = {
     title,
@@ -117,15 +122,20 @@ export const createArticle = async (req, res, next) => {
     return res.status(400).json({ message: `${missingField} is required!` });
   } else {
     try {
-      const createArticleQuery = `INSERT INTO articles (title, author, source, description, content, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+      const createArticleQuery = `
+              INSERT INTO articles (
+                title, author, source, description, content, image_url) 
+              VALUES 
+                ($1, $2, $3, $4, $5, $6) RETURNING id
+      `;
 
-      const result = await query(createArticleQuery, [title, author, source, description, content, image_url]);
+      const result = await query(createArticleQuery, [title, author, source, description, content, imageUrl]);
 
       console.log('Article created!');
-      return res.status(201).json({ message: 'Article successfully created!', article: result.rows[0] });
+      return res.status(201).json({ id: result.rows[0].id, error: null });
     } catch (err) {
       console.error('Error creating article:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ id: null, error: 'INTERNAL_SERVER_ERROR' });
     }
   }
 };
@@ -145,23 +155,23 @@ export const updateArticle = async (req, res, next) => {
     const checkResult = await query(checkArticleQuery, [articleId]);
 
     if (checkResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Article not found!' });
+      return res.status(404).json({ success: false, error: 'NOT_FOUND' });
     }
 
     const existingArticle = checkResult.rows[0];
 
-    const updateArticleQuery = `UPDATE articles SET title = $2, author = $3, source = $4, description = $5, content = $6, image_url = $7 WHERE id = $1 RETURNING *`;
+    const updateArticleQuery = `UPDATE articles SET title = $2, author = $3, source = $4, description = $5, content = $6, image_url = $7 WHERE id = $1 RETURNING id`;
 
     const updateResult = await query(updateArticleQuery, [articleId, updatedTitle, updatedAuthor, updatedSource, updatedDescription, updatedContent, updatedImageUrl]);
 
-    return res.status(200).json({ message: 'Article updated!', article: updateResult.rows[0] });
+    return res.status(200).json({ id: updateResult.rows[0].id, error: null });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ id: null, error: 'INTERNAL_SERVER_ERROR' });
   }
 };
 
-// //DELETE Article by ID
+//DELETE Article by ID
 export const deleteArticle = async (req, res, next) => {
   const articleId = req.params.articleId;
 
@@ -170,19 +180,19 @@ export const deleteArticle = async (req, res, next) => {
     const checkResult = await query(checkArticleQuery, [articleId]);
 
     if (checkResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Article not found!' });
+      return res.status(404).json({ success: false, error: 'NOT_FOUND' });
     }
 
     const deleteArticleQuery = 'DELETE FROM articles WHERE id = $1';
     const deleteResult = await query(deleteArticleQuery, [articleId]);
 
     if (deleteResult.rowCount === 1) {
-      res.status(200).json({ message: 'Article deleted!' });
+      res.status(200).json({ success: true, error: null });
     } else {
-      res.status(500).json({ message: 'Error deleting article!' });
+      res.status(500).json({ success: false, error: 'INTERNAL_SERVER_ERROR' });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'INTERNAL_SERVER_ERROR' });
   }
 };

@@ -1,6 +1,16 @@
 exports.up = async function (knex) {
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
 
+  await knex.raw(`
+    CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+    RETURNS TRIGGER AS $$
+    BEGIN
+      NEW.updated_at = NOW();
+      RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+  `);
+
   await knex.schema.createTable('articles', function (table) {
     table.uuid('id').defaultTo(knex.raw('uuid_generate_v4()')).primary().notNullable();
     table.string('title').notNullable();
@@ -12,16 +22,6 @@ exports.up = async function (knex) {
     table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
     table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
   });
-
-  await knex.raw(`
-    CREATE OR REPLACE FUNCTION trigger_set_timestamp()
-    RETURNS TRIGGER AS $$
-    BEGIN
-      NEW.updated_at = NOW();
-      RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql;
-  `);
 
   await knex.raw(`
     CREATE TRIGGER set_timestamp
