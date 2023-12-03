@@ -2,6 +2,7 @@ import { query } from '../db/index.js';
 
 // CRUD Controllers
 
+// GET Articles
 export const getArticles = async (req, res, next) => {
   try {
     // Extract query parameters
@@ -11,11 +12,12 @@ export const getArticles = async (req, res, next) => {
 
     // Get total count of all items
     let searchQuery = '';
-    if (`%${search}%`) {
+    if (search) {
       searchQuery = `
         WHERE
         title ILIKE $1
-        OR description ILIKE $1`;
+        OR description ILIKE $1
+      `;
       countParams.push(`%${search}%`);
     }
 

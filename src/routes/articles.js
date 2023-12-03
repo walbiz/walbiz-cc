@@ -5,7 +5,7 @@ const router = express.Router();
 
 // CRUD Routes /articles
 router.get('/', getArticles); // /articles
-router.get('/:articleId', getArticle); // /articles/article:Id
+router.get('/:articleId', getArticle); // /articles/:articleId
 router.post('/', createArticle); // /articles
 router.put('/:articleId', updateArticle); // /articles/:articleId
 router.delete('/:articleId', deleteArticle); // /articles/:articleId
