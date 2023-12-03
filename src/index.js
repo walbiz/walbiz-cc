@@ -2,7 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import articleRoutes from './routes/articles.js';
 import wishlistsRoutes from './routes/wishlists.js';
-// import franchiseRoutes from './routes/franchises.js';
+import userRoutes from './routes/users.js';
+import uploadRoutes from './routes/uploads.js';
 
 dotenv.config();
 
@@ -23,9 +24,10 @@ app.get('/', (req, res, next) => {
 });
 
 // CRUD routes
-// app.use('/franchises', franchiseRoutes);
+app.use('/users', userRoutes);
 app.use('/wishlists', wishlistsRoutes);
 app.use('/articles', articleRoutes);
+app.use('/uploads', uploadRoutes);
 
 // Error handling
 app.use((error, req, res, next) => {

@@ -5,7 +5,7 @@ const { Pool } = pgs;
 
 dotenv.config();
 
-// Pro Env
+// // Prod Env
 // const pool = new Pool({
 //   user: process.env.PG_USER,
 //   host: process.env.PG_HOST,

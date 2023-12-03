@@ -1,4 +1,1 @@
-- apa aja yg dibutuhin
-- cara bikin migration scropt
-- commandnya apa buat njalanin
-- .env.example
+# walbiz-api
