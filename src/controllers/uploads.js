@@ -35,7 +35,7 @@ export const uploadProfile = async (req, res, next) => {
           `;
     const insertImageUrl = await query(insertImageUrlQuery, [userId, imageUrl]);
 
-    return res.status(200).json({ userId: userId, command: insertImageUrl.command, imageUrl: imageUrl, error: null });
+    return res.status(200).json({ success: true, userId: userId, command: insertImageUrl.command, imageUrl: imageUrl, error: null });
   } catch (err) {
     console.error(err);
     res.json({
@@ -62,6 +62,7 @@ export const uploadFranchiseLogo = async (req, res, next) => {
     });
 
     res.json({
+      success: true,
       message: 'Upload berhasil',
       imageUrl: `https://storage.googleapis.com/walbiz-assets/${destinationFolder}/${filename}`,
     });
@@ -91,6 +92,7 @@ export const uploadFranchiseImage = async (req, res, next) => {
     });
 
     res.json({
+      success: true,
       message: 'Upload berhasil',
       imageUrl: `https://storage.googleapis.com/walbiz-assets/${destinationFolder}/${filename}`,
     });
@@ -130,7 +132,7 @@ export const uploadArticleImage = async (req, res, next) => {
           `;
     const insertImageUrl = await query(insertImageUrlQuery, [articleId, imageUrl]);
 
-    return res.status(200).json({ articleId: articleId, command: insertImageUrl.command, imageUrl: imageUrl, error: null });
+    return res.status(200).json({ success: true, articleId: articleId, command: insertImageUrl.command, imageUrl: imageUrl, error: null });
 
     // res.json({
     //   message: 'Upload berhasil',

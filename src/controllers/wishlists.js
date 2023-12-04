@@ -79,8 +79,9 @@ export const getWishlists = async (req, res, next) => {
         type: wishlist.type,
         category: wishlist.category,
         costs: wishlist.costs,
+        totalOutlets: wishlist.total_outlets,
         yearEstablished: wishlist.year_established,
-        netProfitsPerMonth: wishlist.net_profit_per_months,
+        netProfitsPerMonth: wishlist.net_profits_per_month,
         licenseDurationInYears: wishlist.license_duration_in_years,
         logoImageUrl: wishlist.logo_image_url,
         imageUrl: wishlist.image_url,
@@ -178,7 +179,7 @@ export const createWishlist = async (req, res, next) => {
           `;
 
     const result = await query(createWishlistQuery, [userId, name, type, description, category, costs, totalOutlets, websiteUrl, phoneNumber, emailAddress, yearEstablished, companyName, companyAddress, netProfitsPerMonth, licenseDurationInYears, royaltyFeesPerMonth, returnOfInvestment, logoImageUrl, imageUrl]);
-    return res.status(201).json({ id: result.rows[0].id, error: null });
+    return res.status(201).json({ success: true, id: result.rows[0].id, error: null });
   } catch (err) {
     console.error(err);
     res.status(500).json({ id: null, error: 'INTERNAL_SERVER_ERROR' });
