@@ -5,7 +5,7 @@ const { Pool } = pgs;
 
 dotenv.config();
 
-// // Prod Env
+// // Production Environtment (comment this field if want to user dev env)
 // const pool = new Pool({
 //   user: process.env.PG_USER,
 //   host: process.env.PG_HOST,
@@ -14,7 +14,7 @@ dotenv.config();
 //   port: process.env.PG_PORT,
 // });
 
-// Dev Env
+// Dev Environtment (comment this field if want to user prod env)
 const pool = new Pool({
   user: process.env.PG_DEV_USER,
   host: process.env.PG_DEV_HOST,

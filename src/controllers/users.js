@@ -5,8 +5,10 @@ export const getAllUsers = async (req, res, next) => {
   try {
     const data = await GetAllUsers();
     res.json({
+      success: true,
       message: 'GET all users success',
       data: data,
+      error: null,
     });
   } catch (error) {
     console.error('Error in getAllUsers:', error);
@@ -35,8 +37,10 @@ export const createNewUser = async (req, res, next) => {
     const userId = result.rows[0].id;
 
     res.status(201).json({
+      success: true,
       message: 'CREATE new user success',
       data: { id: userId, ...userData },
+      error: null,
       //   data: userData,
     });
   } catch (error) {
@@ -109,6 +113,7 @@ export const loginUser = async (req, res, next) => {
     }
 
     res.json({
+      success: true,
       message: 'Login successful',
       user,
     });
@@ -122,7 +127,5 @@ export const loginUser = async (req, res, next) => {
 };
 
 export const logoutUser = (req, res, next) => {
-  res.json({
-    message: 'Logout successful',
-  });
+  res.json({ success: true, message: 'Logout successful' });
 };

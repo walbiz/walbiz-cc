@@ -134,7 +134,7 @@ export const createArticle = async (req, res, next) => {
       const result = await query(createArticleQuery, [title, author, source, description, content, imageUrl]);
 
       console.log('Article created!');
-      return res.status(201).json({ id: result.rows[0].id, error: null });
+      return res.status(201).json({ success: true, id: result.rows[0].id, error: null });
     } catch (err) {
       console.error('Error creating article:', err);
       res.status(500).json({ id: null, error: 'INTERNAL_SERVER_ERROR' });
@@ -166,7 +166,7 @@ export const updateArticle = async (req, res, next) => {
 
     const updateResult = await query(updateArticleQuery, [articleId, updatedTitle, updatedAuthor, updatedSource, updatedDescription, updatedContent, updatedImageUrl]);
 
-    return res.status(200).json({ id: updateResult.rows[0].id, error: null });
+    return res.status(200).json({ success: true, id: updateResult.rows[0].id, error: null });
   } catch (err) {
     console.error(err);
     res.status(500).json({ id: null, error: 'INTERNAL_SERVER_ERROR' });
