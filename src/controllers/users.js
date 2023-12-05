@@ -1,4 +1,4 @@
-import { GetAllUsers, CreateNewUser, UpdateUser, DeleteUser, GetUserByEmail } from '../models/users.js';
+import { GetAllUsers, CreateNewUser, UpdateUser, DeleteUserAndWishlists, GetUserByEmail } from '../models/users.js';
 import bcrypt from 'bcrypt';
 
 export const getAllUsers = async (req, res, next) => {
@@ -22,6 +22,15 @@ export const getAllUsers = async (req, res, next) => {
 export const createNewUser = async (req, res, next) => {
   const { body } = req;
 
+  // Check if password and verifyPassword match
+  if (body.password !== body.verifyPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'Passwords do not match.',
+      error: 'BAD_REQUEST',
+    });
+  }
+
   const hashedPassword = await bcrypt.hash(body.password, 10);
 
   const userData = {
@@ -37,7 +46,6 @@ export const createNewUser = async (req, res, next) => {
     const userId = result.rows[0].id;
 
     res.status(201).json({
-      success: true,
       message: 'CREATE new user success',
       data: { id: userId, ...userData },
       error: null,
@@ -75,6 +83,7 @@ export const updateUser = async (req, res, next) => {
         id: idUser,
         ...body,
       },
+      error: null,
     });
   } catch (error) {
     res.status(500).json({
@@ -87,10 +96,11 @@ export const updateUser = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   const { idUser } = req.params;
   try {
-    await DeleteUser(idUser);
+    await DeleteUserAndWishlists(idUser);
     res.json({
+      success: true,
       message: 'DELETE user success',
-      data: null,
+      error: null,
     });
   } catch (error) {
     res.status(500).json({
@@ -113,9 +123,9 @@ export const loginUser = async (req, res, next) => {
     }
 
     res.json({
-      success: true,
       message: 'Login successful',
       user,
+      error: null,
     });
   } catch (error) {
     console.error('Error in loginUser:', error);
@@ -127,5 +137,5 @@ export const loginUser = async (req, res, next) => {
 };
 
 export const logoutUser = (req, res, next) => {
-  res.json({ success: true, message: 'Logout successful' });
+  res.json({ success: true, message: 'Logout successful', error: null });
 };

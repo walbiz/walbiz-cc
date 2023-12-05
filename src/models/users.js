@@ -18,9 +18,14 @@ export const UpdateUser = (body, idUser) => {
   return query(SQLQuery, values);
 };
 
-export const DeleteUser = (idUser) => {
-  const SQLQuery = 'DELETE FROM users WHERE id=$1';
-  return query(SQLQuery, [idUser]);
+export const DeleteUserAndWishlists = async (idUser) => {
+  // Delete wishlists first
+  const deleteWishlistsQuery = 'DELETE FROM wishlists WHERE user_id = $1;';
+  await query(deleteWishlistsQuery, [idUser]);
+
+  // Then delete the user
+  const deleteUserQuery = 'DELETE FROM users WHERE id = $1;';
+  await query(deleteUserQuery, [idUser]);
 };
 
 export const GetUserByEmail = (email) => {
@@ -28,11 +33,3 @@ export const GetUserByEmail = (email) => {
   const values = [email];
   return query(SQLQuery, values).then((result) => result.rows[0]); // Assuming there should be only one user with a given email
 };
-
-// module.exports = {
-//   getAllUsers,
-//   createNewUser,
-//   updateUser,
-//   deleteUser,
-//   getUserByEmail, // Add this line to export the new function
-// };

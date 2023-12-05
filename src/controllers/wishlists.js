@@ -164,9 +164,10 @@ export const getWishlistsByUserId = async (req, res, next) => {
   }
 };
 
-// POST Wishlists
-export const createWishlist = async (req, res, next) => {
-  const { userId, name, type, description, category, costs, totalOutlets, websiteUrl, phoneNumber, emailAddress, yearEstablished, companyName, companyAddress, netProfitsPerMonth, licenseDurationInYears, royaltyFeesPerMonth, returnOfInvestment, logoImageUrl, imageUrl } = req.body;
+// POST Wishlists by User ID
+export const createWishlistByUserId = async (req, res, next) => {
+  const userId = req.params.userId;
+  const { name, type, description, category, costs, totalOutlets, websiteUrl, phoneNumber, emailAddress, yearEstablished, companyName, companyAddress, netProfitsPerMonth, licenseDurationInYears, royaltyFeesPerMonth, returnOfInvestment, logoImageUrl, imageUrl } = req.body;
 
   try {
     const createWishlistQuery = `
@@ -179,7 +180,7 @@ export const createWishlist = async (req, res, next) => {
           `;
 
     const result = await query(createWishlistQuery, [userId, name, type, description, category, costs, totalOutlets, websiteUrl, phoneNumber, emailAddress, yearEstablished, companyName, companyAddress, netProfitsPerMonth, licenseDurationInYears, royaltyFeesPerMonth, returnOfInvestment, logoImageUrl, imageUrl]);
-    return res.status(201).json({ success: true, id: result.rows[0].id, error: null });
+    return res.status(201).json({ id: result.rows[0].id, error: null });
   } catch (err) {
     console.error(err);
     res.status(500).json({ id: null, error: 'INTERNAL_SERVER_ERROR' });
@@ -187,19 +188,20 @@ export const createWishlist = async (req, res, next) => {
 };
 
 // DELETE Wishlists
-export const deleteWishlist = async (req, res, next) => {
-  const wishlistId = req.params.wishlistId;
+export const deleteWishlistByUserId = async (req, res, next) => {
+  const userId = req.params.userId;
+  const wishlistId = req.body.id;
 
   try {
-    const checkWishlistQuery = 'SELECT * FROM wishlists WHERE id = $1';
-    const checkResult = await query(checkWishlistQuery, [wishlistId]);
+    const checkWishlistQuery = 'SELECT * FROM wishlists WHERE user_id = $1 AND id = $2';
+    const checkResult = await query(checkWishlistQuery, [userId, wishlistId]);
 
     if (checkResult.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'NOT_FOUND' });
     }
 
-    const deleteWishlistQuery = 'DELETE FROM wishlists WHERE id = $1';
-    const deleteResult = await query(deleteWishlistQuery, [wishlistId]);
+    const deleteWishlistQuery = 'DELETE FROM wishlists WHERE user_id = $1 AND id = $2';
+    const deleteResult = await query(deleteWishlistQuery, [userId, wishlistId]);
 
     if (deleteResult.rowCount === 1) {
       res.status(200).json({ success: true, error: null });
