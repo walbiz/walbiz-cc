@@ -7,16 +7,20 @@ const app = express();
 
 app.use(logRequest);
 
-export const uploadProfile = async (req, res, next) => {
-  const userId = req.params.userId;
+const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
 
+const uploadImage = async (req, res, next, folder, updateQuery) => {
   try {
     if (!req.file) {
       throw new Error('No file uploaded.');
     }
 
+    if (!allowedImageTypes.includes(req.file.mimetype)) {
+      throw new Error('Invalid file type. Only JPG, JPEG, or PNG images are allowed.');
+    }
+
     const filename = `${new Date().getTime()}-${req.file.originalname}`;
-    const destinationFolder = 'public/profile-images';
+    const destinationFolder = `public/${folder}`;
 
     const file = bucket.file(`${destinationFolder}/${filename}`);
 
@@ -28,120 +32,42 @@ export const uploadProfile = async (req, res, next) => {
 
     const imageUrl = `https://storage.googleapis.com/walbiz-assets/${destinationFolder}/${filename}`;
 
-    const insertImageUrlQuery = `
-            UPDATE users
-            SET profile_image_url = $2
-            WHERE id = $1
-          `;
-    const insertImageUrl = await query(insertImageUrlQuery, [userId, imageUrl]);
-
-    return res.status(200).json({ success: true, userId: userId, command: insertImageUrl.command, imageUrl: imageUrl, error: null });
-  } catch (err) {
-    console.error(err);
+    res.status(200).json({ success: true, message: 'Upload berhasil', imageUrl });
+  } catch (error) {
+    console.error(`Error in upload${folder}: ${error.message}`);
     res.json({
-      message: err.message,
+      message: `Failed to upload ${folder.replace(/-/g, ' ')} image`,
+      error: error.message,
     });
   }
+};
+
+export const uploadProfile = async (req, res, next) => {
+  const userId = req.params.userId;
+  const updateQuery = `
+    UPDATE users
+    SET profile_image_url = $2
+    WHERE id = $1
+  `;
+  await uploadImage(req, res, next, 'profile-images', updateQuery, userId);
 };
 
 export const uploadFranchiseLogo = async (req, res, next) => {
-  try {
-    if (!req.file) {
-      throw new Error('No file uploaded.');
-    }
-
-    const filename = `${new Date().getTime()}-${req.file.originalname}`;
-    const destinationFolder = 'public/franchise-logo-images';
-
-    const file = bucket.file(`${destinationFolder}/${filename}`);
-
-    await file.save(req.file.buffer, {
-      metadata: {
-        contentType: req.file.mimetype,
-      },
-    });
-
-    res.json({
-      success: true,
-      message: 'Upload berhasil',
-      imageUrl: `https://storage.googleapis.com/walbiz-assets/${destinationFolder}/${filename}`,
-    });
-  } catch (err) {
-    console.error(err);
-    res.json({
-      message: err.message,
-    });
-  }
+  const updateQuery = null;
+  await uploadImage(req, res, next, 'franchise-logo-images', updateQuery);
 };
 
 export const uploadFranchiseImage = async (req, res, next) => {
-  try {
-    if (!req.file) {
-      throw new Error('No file uploaded.');
-    }
-
-    const filename = `${new Date().getTime()}-${req.file.originalname}`;
-    const destinationFolder = 'public/franchise-images';
-
-    const file = bucket.file(`${destinationFolder}/${filename}`);
-
-    await file.save(req.file.buffer, {
-      metadata: {
-        contentType: req.file.mimetype,
-      },
-    });
-
-    res.json({
-      success: true,
-      message: 'Upload berhasil',
-      imageUrl: `https://storage.googleapis.com/walbiz-assets/${destinationFolder}/${filename}`,
-    });
-  } catch (err) {
-    console.error(err);
-    res.json({
-      message: err.message,
-    });
-  }
+  const updateQuery = null;
+  await uploadImage(req, res, next, 'franchise-images', updateQuery);
 };
 
 export const uploadArticleImage = async (req, res, next) => {
   const articleId = req.params.articleId;
-
-  try {
-    if (!req.file) {
-      throw new Error('No file uploaded.');
-    }
-
-    const filename = `${new Date().getTime()}-${req.file.originalname}`;
-    const destinationFolder = 'public/article-images';
-
-    const file = bucket.file(`${destinationFolder}/${filename}`);
-
-    await file.save(req.file.buffer, {
-      metadata: {
-        contentType: req.file.mimetype,
-      },
-    });
-
-    const imageUrl = `https://storage.googleapis.com/walbiz-assets/${destinationFolder}/${filename}`;
-
-    const insertImageUrlQuery = `
-            UPDATE articles
-            SET image_url = $2
-            WHERE id = $1
-          `;
-    const insertImageUrl = await query(insertImageUrlQuery, [articleId, imageUrl]);
-
-    return res.status(200).json({ success: true, articleId: articleId, command: insertImageUrl.command, imageUrl: imageUrl, error: null });
-
-    // res.json({
-    //   message: 'Upload berhasil',
-    //   imageUrl: `https://storage.googleapis.com/walbiz-assets/${destinationFolder}/${filename}`,
-    // });
-  } catch (err) {
-    console.error(err);
-    res.json({
-      message: err.message,
-    });
-  }
+  const updateQuery = `
+    UPDATE articles
+    SET image_url = $2
+    WHERE id = $1
+  `;
+  await uploadImage(req, res, next, 'article-images', updateQuery, articleId);
 };
