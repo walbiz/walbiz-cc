@@ -3,18 +3,14 @@ import { createNewUser, loginUser, logoutUser, getAllUsers, updateUser, deleteUs
 
 const router = express.Router();
 
-// CREATE - POST
 router.post('/register', createNewUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser);
 
-// READ - GET
 router.get('/', getAllUsers);
 
-// UPDATE - PATCH
 router.put('/:idUser', updateUser);
 
-// DELETE - DELETE
 router.delete('/:idUser', deleteUser);
 
 export default router;

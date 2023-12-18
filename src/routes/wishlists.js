@@ -3,11 +3,8 @@ import express from 'express';
 
 const router = express.Router();
 
-// CRUD Routes /wishlists
-
-router.get('/', getWishlists); // /wishlists
-router.get('/:userId', getWishlistsByUserId); // /wishlist/:wishlistId
-router.post('/:userId', createWishlistByUserId); // /wishlists
-router.delete('/:userId', deleteWishlistByUserId); // /wishlist/::wishlistId
-
+router.get('/', getWishlists);
+router.get('/:userId', getWishlistsByUserId);
+router.post('/:userId', createWishlistByUserId);
+router.delete('/:userId', deleteWishlistByUserId);
 export default router;

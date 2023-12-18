@@ -1,15 +1,11 @@
 import { query } from '../db/index.js';
 
-// CRUD Controllers
-
-// GET All Wishlists
 export const getWishlists = async (req, res, next) => {
   try {
     const { limit, offset, search } = req.query;
 
     const countParams = [];
 
-    // Get total count of all items
     let searchQuery = '';
     if (search) {
       searchQuery = `
@@ -31,7 +27,6 @@ export const getWishlists = async (req, res, next) => {
     const countRes = await query(totalCountQuery, countParams);
     const totalCount = countRes.rows[0]['total_count'];
 
-    // Initialize article query
     const params = [];
     let paramIndex = 1;
 
@@ -52,7 +47,6 @@ export const getWishlists = async (req, res, next) => {
         FROM wishlists w
         `;
 
-    // Add search condition if provided
     if (search) {
       baseQuery += ` WHERE name ILIKE $${paramIndex} OR type ILIKE $${paramIndex} OR category $${paramIndex} OR costs $${paramIndex}`;
       params.push(`%${search}%`);
@@ -64,13 +58,10 @@ export const getWishlists = async (req, res, next) => {
       params.push(parseInt(offset));
     }
 
-    // Execute the query
     const result = await query(baseQuery, params);
 
-    // Extract relevant data from result
     const wishlists = result.rows;
 
-    // Format the response
     const response = {
       nodes: wishlists.map((wishlist) => ({
         id: wishlist.id,
@@ -97,19 +88,16 @@ export const getWishlists = async (req, res, next) => {
   }
 };
 
-// GET Wishlist by User ID
 export const getWishlistsByUserId = async (req, res, next) => {
   const userId = req.params.userId;
 
   try {
-    // Count the total number of wishlists
     const totalCountQuery = `
       SELECT COUNT(w.id) AS total_count
       FROM wishlists w
       WHERE user_id = $1
     `;
 
-    // Execute the total count query
     const totalCountResult = await query(totalCountQuery, [userId]);
     const totalCount = totalCountResult.rows[0].total_count;
 
@@ -131,13 +119,10 @@ export const getWishlistsByUserId = async (req, res, next) => {
           WHERE w.user_id = $1
         `;
 
-    // Execute the query
     const result = await query(wishlistQuery, [userId]);
 
-    // Extract relevant data from result
     const wishlists = result.rows;
 
-    // Format the response
     const response = {
       nodes: wishlists.map((wishlist) => ({
         id: wishlist.id,
@@ -164,7 +149,6 @@ export const getWishlistsByUserId = async (req, res, next) => {
   }
 };
 
-// POST Wishlists by User ID
 export const createWishlistByUserId = async (req, res, next) => {
   const userId = req.params.userId;
   const { name, type, description, category, costs, totalOutlets, websiteUrl, phoneNumber, emailAddress, yearEstablished, companyName, companyAddress, netProfitsPerMonth, licenseDurationInYears, royaltyFeesPerMonth, returnOfInvestment, logoImageUrl, imageUrl } = req.body;
@@ -187,7 +171,6 @@ export const createWishlistByUserId = async (req, res, next) => {
   }
 };
 
-// DELETE Wishlists
 export const deleteWishlistByUserId = async (req, res, next) => {
   const userId = req.params.userId;
   const wishlistId = req.body.id;

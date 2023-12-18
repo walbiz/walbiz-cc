@@ -1,4 +1,3 @@
-// const pool = require('../db/index.js');
 import { query } from '../db/index.js';
 
 export const GetAllUsers = () => {
@@ -19,11 +18,9 @@ export const UpdateUser = (body, idUser) => {
 };
 
 export const DeleteUserAndWishlists = async (idUser) => {
-  // Delete wishlists first
   const deleteWishlistsQuery = 'DELETE FROM wishlists WHERE user_id = $1;';
   await query(deleteWishlistsQuery, [idUser]);
 
-  // Then delete the user
   const deleteUserQuery = 'DELETE FROM users WHERE id = $1;';
   await query(deleteUserQuery, [idUser]);
 };
@@ -31,5 +28,5 @@ export const DeleteUserAndWishlists = async (idUser) => {
 export const GetUserByEmail = (email) => {
   const SQLQuery = 'SELECT * FROM users WHERE email = $1';
   const values = [email];
-  return query(SQLQuery, values).then((result) => result.rows[0]); // Assuming there should be only one user with a given email
+  return query(SQLQuery, values).then((result) => result.rows[0]);
 };

@@ -1,16 +1,11 @@
 import { query } from '../db/index.js';
 
-// CRUD Controllers
-
-// GET Articles
 export const getArticles = async (req, res, next) => {
   try {
-    // Extract query parameters
     const { limit, offset, search } = req.query;
 
     const countParams = [];
 
-    // Get total count of all items
     let searchQuery = '';
     if (search) {
       searchQuery = `
@@ -29,7 +24,6 @@ export const getArticles = async (req, res, next) => {
     const countRes = await query(totalCountQuery, countParams);
     const totalCount = countRes.rows[0]['total_count'];
 
-    // Initialize article query
     const params = [];
     let paramIndex = 1;
 
@@ -43,7 +37,6 @@ export const getArticles = async (req, res, next) => {
       FROM articles a
     `;
 
-    // Add search condition if provided
     if (search) {
       baseQuery += ` WHERE title ILIKE $${paramIndex} OR description ILIKE $${paramIndex}`;
       params.push(`%${search}%`);
@@ -53,7 +46,7 @@ export const getArticles = async (req, res, next) => {
     if (limit) {
       baseQuery += ` LIMIT $${paramIndex}`;
       params.push(parseInt(limit));
-      paramIndex++; // Move to the next index for parameters
+      paramIndex++;
     }
 
     if (offset) {
@@ -61,13 +54,10 @@ export const getArticles = async (req, res, next) => {
       params.push(parseInt(offset));
     }
 
-    // Execute the query
     const result = await query(baseQuery, params);
 
-    // Extract relevant data from the result
     const articles = result.rows;
 
-    // Format the response
     const response = {
       nodes: articles.map((article) => ({
         id: article.id,
@@ -87,7 +77,6 @@ export const getArticles = async (req, res, next) => {
   }
 };
 
-//GET Article by ID
 export const getArticle = async (req, res, next) => {
   const articleId = req.params.articleId;
 
@@ -106,7 +95,6 @@ export const getArticle = async (req, res, next) => {
   }
 };
 
-// POST Article
 export const createArticle = async (req, res, next) => {
   const { title, author, source, description, content, imageUrl } = req.body;
 
@@ -126,8 +114,8 @@ export const createArticle = async (req, res, next) => {
     try {
       const createArticleQuery = `
               INSERT INTO articles (
-                title, author, source, description, content, image_url) 
-              VALUES 
+                title, author, source, description, content, image_url)
+              VALUES
                 ($1, $2, $3, $4, $5, $6) RETURNING id
       `;
 
@@ -142,7 +130,6 @@ export const createArticle = async (req, res, next) => {
   }
 };
 
-//PUT Article by ID
 export const updateArticle = async (req, res, next) => {
   const articleId = req.params.articleId;
   const updatedTitle = req.body.title;
@@ -171,7 +158,6 @@ export const updateArticle = async (req, res, next) => {
   }
 };
 
-//DELETE Article by ID
 export const deleteArticle = async (req, res, next) => {
   const articleId = req.params.articleId;
 

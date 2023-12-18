@@ -3,11 +3,10 @@ import express from 'express';
 
 const router = express.Router();
 
-// CRUD Routes /franchises
-router.get('/', getFranchises); // /franchises
-router.get('/:franchiseId', getFranchise); // /franchises/:id
-router.post('/', createFranchise); // /franchises
-router.put('/', updateFranchise); // /franchises/:id
-router.delete('/:franchiseId', deleteFranchise); // /franchises/:franchiseId
+router.get('/', getFranchises);
+router.get('/:franchiseId', getFranchise);
+router.post('/', createFranchise);
+router.put('/', updateFranchise);
+router.delete('/:franchiseId', deleteFranchise);
 
 export default router;

@@ -22,7 +22,6 @@ export const getAllUsers = async (req, res, next) => {
 export const createNewUser = async (req, res, next) => {
   const { body } = req;
 
-  // Check if password and verifyPassword match
   if (body.password !== body.verifyPassword) {
     return res.status(400).json({
       success: false,
@@ -42,23 +41,19 @@ export const createNewUser = async (req, res, next) => {
   try {
     const result = await CreateNewUser(userData);
 
-    // Extract the returned id from the result
     const userId = result.rows[0].id;
 
     res.status(201).json({
       message: 'CREATE new user success',
       data: { id: userId, ...userData },
       error: null,
-      //   data: userData,
     });
   } catch (error) {
     if (error.code === '23505' && error.constraint === 'users_email_unique') {
-      // Email already exists
       res.status(400).json({
         message: `Email ${body.email} already exists.`,
       });
     } else {
-      // Other server errors
       res.status(500).json({
         message: 'Server Error',
         serverMessage: error,
