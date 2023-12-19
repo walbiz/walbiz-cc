@@ -1,8 +1,18 @@
 import { query } from '../db/index.js';
 
-export const GetAllUsers = () => {
-  const SQLQuery = 'SELECT * FROM users';
-  return query(SQLQuery).then((result) => result.rows);
+const userFields = ['id', 'name', 'email', 'profile_image_url', 'created_at', 'updated_at'];
+
+export const GetAllUsers = async () => {
+  const SQLQuery = `SELECT ${userFields.join(', ')} FROM users`;
+  const result = await query(SQLQuery);
+  return result.rows;
+};
+
+export const GetUserById = async (userId) => {
+  const SQLQuery = `SELECT ${userFields.join(', ')} FROM users WHERE id = $1`;
+  const values = [userId];
+  const result = await query(SQLQuery, values);
+  return result.rows[0];
 };
 
 export const CreateNewUser = (userData) => {

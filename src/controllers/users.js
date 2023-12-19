@@ -1,4 +1,4 @@
-import { GetAllUsers, CreateNewUser, UpdateUser, DeleteUserAndWishlists, GetUserByEmail } from '../models/users.js';
+import { GetAllUsers, GetUserById, CreateNewUser, UpdateUser, DeleteUserAndWishlists, GetUserByEmail } from '../models/users.js';
 import bcrypt from 'bcrypt';
 
 export const getAllUsers = async (req, res, next) => {
@@ -12,6 +12,33 @@ export const getAllUsers = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error in getAllUsers:', error);
+    res.status(500).json({
+      message: 'Server Error',
+      serverMessage: error,
+    });
+  }
+};
+
+export const getUserById = async (req, res, next) => {
+  const { idUser } = req.params;
+
+  try {
+    const user = await GetUserById(idUser);
+
+    if (!user) {
+      return res.status(404).json({
+        message: `User with ID ${idUser} not found.`,
+        error: 'NOT_FOUND',
+      });
+    }
+
+    res.json({
+      message: 'GET user by ID success',
+      user,
+      error: null,
+    });
+  } catch (error) {
+    console.error('Error in getUserById:', error);
     res.status(500).json({
       message: 'Server Error',
       serverMessage: error,
